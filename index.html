@@ -2,7 +2,6 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <!-- ESTA LÍNEA ES LA CLAVE PARA QUE SE ADAPTE A CELULARES -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Prototipo Didáctico 3D - Plástico Reciclado HDPE</title>
     <style>
@@ -13,7 +12,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #1a1a2e;
             color: #ffffff;
-            touch-action: none; /* Evita que la pantalla se mueva por accidente en celulares */
+            touch-action: none;
         }
         #canvas-container {
             width: 100vw;
@@ -35,48 +34,45 @@
             padding: 12px 16px;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
             pointer-events: auto;
-            max-width: 280px;
+            max-width: 260px;
         }
         h1 {
-            font-size: 1.1rem;
+            font-size: 1rem;
             margin: 0 0 4px 0;
             color: #4eefb6;
         }
         p {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             margin: 0;
             color: #e0e0e0;
             line-height: 1.3;
         }
         #controls {
             position: absolute;
-            bottom: 20px;
+            bottom: 25px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 100;
             display: flex;
+            flex-direction: row;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
             background: rgba(0, 0, 0, 0.6);
             padding: 8px 12px;
-            border-radius: 20px;
+            border-radius: 24px;
             backdrop-filter: blur(5px);
-            max-width: 90vw;
+            max-width: 95vw;
         }
         button {
             background: #4eefb6;
             color: #0f172a;
             border: none;
-            padding: 8px 14px;
+            padding: 8px 12px;
             border-radius: 16px;
             font-weight: bold;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        button:hover {
-            background: #3bd4a0;
         }
         #info-modal {
             position: absolute;
@@ -84,14 +80,13 @@
             right: 15px;
             z-index: 100;
             display: none;
-            max-width: 260px;
+            max-width: 250px;
         }
         .highlight {
             color: #ffd166;
             font-weight: bold;
         }
     </style>
-    <!-- Imports de Three.js y OrbitControls -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
@@ -107,15 +102,15 @@
     </div>
 
     <div id="info-modal" class="card">
-        <h1 id="info-title">Detalle de Elemento</h1>
+        <h1 id="info-title">Detalle</h1>
         <div id="info-content"></div>
     </div>
 
     <div id="controls">
-        <button id="btn-stool">Ver Banquito</button>
-        <button id="btn-letters">Ver Letras</button>
-        <button id="btn-shapes">Ver Encaje</button>
-        <button id="btn-animate">Elevar / Encajar</button>
+        <button id="btn-stool">Banquito</button>
+        <button id="btn-letters">Letras</button>
+        <button id="btn-shapes">Encaje</button>
+        <button id="btn-animate">Elevar / Bajar</button>
     </div>
 
     <script>
@@ -128,9 +123,8 @@
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Optimizado para celulares de alta resolución
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.appendChild(renderer.domElement);
 
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -138,29 +132,24 @@
         controls.dampingFactor = 0.05;
         controls.maxPolarAngle = Math.PI / 2 - 0.05;
 
-        // Iluminación
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
-        scene.add(ambientLight);
-
+        scene.add(new THREE.AmbientLight(0xffffff, 0.7));
         const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
         dirLight.position.set(15, 25, 15);
         dirLight.castShadow = true;
         scene.add(dirLight);
 
-        // Suelo
-        const floorGeo = new THREE.PlaneGeometry(60, 60);
-        const floorMat = new THREE.MeshStandardMaterial({ color: 0x252840, roughness: 0.8 });
-        const floor = new THREE.Mesh(floorGeo, floorMat);
+        const floor = new THREE.Mesh(
+            new THREE.PlaneGeometry(60, 60),
+            new THREE.MeshStandardMaterial({ color: 0x252840, roughness: 0.8 })
+        );
         floor.rotation.x = -Math.PI / 2;
         floor.position.y = -0.1;
         floor.receiveShadow = true;
         scene.add(floor);
 
-        // Textura Terrazzo Confeti HDPE
         function createTerrazzoTexture(baseColorHex) {
             const canvas = document.createElement('canvas');
-            canvas.width = 512;
-            canvas.height = 512;
+            canvas.width = canvas.height = 512;
             const ctx = canvas.getContext('2d');
             ctx.fillStyle = baseColorHex;
             ctx.fillRect(0, 0, 512, 512);
@@ -168,15 +157,11 @@
             for (let i = 0; i < 400; i++) {
                 ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
                 ctx.beginPath();
-                const x = Math.random() * 512;
-                const y = Math.random() * 512;
-                const r = Math.random() * 6 + 2;
-                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.arc(Math.random() * 512, Math.random() * 512, Math.random() * 6 + 2, 0, Math.PI * 2);
                 ctx.fill();
             }
             const texture = new THREE.CanvasTexture(canvas);
-            texture.wrapS = THREE.RepeatWrapping;
-            texture.wrapT = THREE.RepeatWrapping;
+            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
             return texture;
         }
 
@@ -191,35 +176,29 @@
         const mouse = new THREE.Vector2();
         const interactiveObjects = [];
 
-        // 1. BANQUITO (Patas Gruesas y Esquinas Redondeadas)
+        // 1. BANQUITO (Patas Gruesas y seguras)
         const stoolGroup = new THREE.Group();
         stoolGroup.position.set(-8, 0, 0);
-
-        const seatGeo = new THREE.BoxGeometry(6, 0.8, 6);
-        const seat = new THREE.Mesh(seatGeo, matBlue);
+        const seat = new THREE.Mesh(new THREE.BoxGeometry(6, 0.8, 6), matBlue);
         seat.position.y = 4;
         seat.castShadow = true;
-        seat.receiveShadow = true;
         stoolGroup.add(seat);
 
-        const legRadius = 0.75;
-        const legGeo = new THREE.CylinderGeometry(legRadius, legRadius, legHeight = 4, 16);
-        const legPositions = [[-2.2, 2, -2.2], [2.2, 2, -2.2], [-2.2, 2, 2.2], [2.2, 2, 2.2]];
-        legPositions.forEach(pos => {
+        const legGeo = new THREE.CylinderGeometry(0.75, 0.75, 4, 16);
+        [[-2.2, 2, -2.2], [2.2, 2, -2.2], [-2.2, 2, 2.2], [2.2, 2, 2.2]].forEach(pos => {
             const leg = new THREE.Mesh(legGeo, matYellow);
             leg.position.set(...pos);
             leg.castShadow = true;
             stoolGroup.add(leg);
         });
-
         stoolGroup.userData = {
             title: "Banquito de Preescolar",
-            details: `• <span class="highlight">Peso:</span> 3 kg<br>• <span class="highlight">Plástico HDPE:</span> 3.3 kg aprox.<br>• <span class="highlight">Equivalencia:</span> ~900 tapitas`
+            details: `• <span class="highlight">Peso:</span> 3 kg<br>• <span class="highlight">Plástico HDPE:</span> 3.3 kg<br>• <span class="highlight">Equivalencia:</span> ~900 tapitas`
         };
         scene.add(stoolGroup);
         interactiveObjects.push(seat);
 
-        // 2. TABLERO DE ENCAJE
+        // 2. TABLERO DE ENCAJE Y FICHAS (Tamaño corregido)
         const puzzleGroup = new THREE.Group();
         puzzleGroup.position.set(6, 0.4, -4);
 
@@ -242,29 +221,31 @@
         holeRect.moveTo(0.7, -2.5); holeRect.lineTo(2.3, -2.5); holeRect.lineTo(2.3, -1.3); holeRect.lineTo(0.7, -1.3); holeRect.closePath();
         boardShape.holes.push(holeRect);
 
-        const boardGeo = new THREE.ExtrudeGeometry(boardShape, { depth: 0.8, bevelEnabled: true, bevelSize: 0.05, bevelThickness: 0.05 });
-        const boardMesh = new THREE.Mesh(boardGeo, matBoard);
+        const boardMesh = new THREE.Mesh(new THREE.ExtrudeGeometry(boardShape, { depth: 0.8, bevelEnabled: true, bevelSize: 0.05, bevelThickness: 0.05 }), matBoard);
         boardMesh.rotation.x = -Math.PI / 2;
         boardMesh.castShadow = true;
         puzzleGroup.add(boardMesh);
 
         const shapesGroup = new THREE.Group();
+        
+        // Triángulo ajustado al tamaño del molde
         const triShape = new THREE.Shape();
-        triShape.moveTo(-0.7, -0.6); triShape.lineTo(0.7, -0.6); triShape.lineTo(0, 0.8); triShape.closePath();
-        const triMesh = new THREE.Mesh(new THREE.ExtrudeGeometry(triShape, { depth: 0.78 }), matRed);
-        triMesh.rotation.x = -Math.PI / 2; triMesh.position.set(-1.5, 0.4, -2);
+        triShape.moveTo(-0.65, -0.6); triShape.lineTo(0.65, -0.6); triShape.lineTo(0, 0.75); triShape.closePath();
+        const triMesh = new THREE.Mesh(new THREE.ExtrudeGeometry(triShape, { depth: 0.76 }), matRed);
+        triMesh.rotation.x = -Math.PI / 2; 
+        triMesh.position.set(-1.5, 0, -2);
         shapesGroup.add(triMesh);
 
-        const circMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.78, 0.78, 0.78, 32), matGreen);
-        circMesh.position.set(1.5, 0.4, -2);
+        const circMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.75, 0.76, 32), matGreen);
+        circMesh.position.set(1.5, 0, -2);
         shapesGroup.add(circMesh);
 
-        const sqMesh = new THREE.Mesh(new THREE.BoxGeometry(1.36, 0.78, 1.36), matYellow);
-        sqMesh.position.set(-1.5, 0.4, 1.8);
+        const sqMesh = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.76, 1.3), matYellow);
+        sqMesh.position.set(-1.5, 0, 1.8);
         shapesGroup.add(sqMesh);
 
-        const rectMesh = new THREE.Mesh(new THREE.BoxGeometry(1.56, 0.78, 1.16), matOrange);
-        rectMesh.position.set(1.5, 0.4, 1.9);
+        const rectMesh = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.76, 1.1), matOrange);
+        rectMesh.position.set(1.5, 0, 1.9);
         shapesGroup.add(rectMesh);
 
         puzzleGroup.add(shapesGroup);
@@ -284,11 +265,11 @@
         lettersGroup.position.set(0, 0, 6);
 
         loader.load('https://threejs.org/examples/fonts/helvetiker_bold.typeface.json', function (font) {
-            const chars = ['A', 'B', 'C', '1', '2', '3'];
-            const materials = [matRed, matYellow, matGreen, matBlue, matOrange];
-            chars.forEach((char, index) => {
-                const geo = new THREE.TextGeometry(char, { font: font, size: 1.2, height: 0.4, curveSegments: 4 });
-                const mesh = new THREE.Mesh(geo, materials[index % materials.length]);
+            ['A', 'B', 'C', '1', '2', '3'].forEach((char, index) => {
+                const mesh = new THREE.Mesh(
+                    new THREE.TextGeometry(char, { font: font, size: 1.2, height: 0.4, curveSegments: 4 }),
+                    [matRed, matYellow, matGreen, matBlue, matOrange][index % 5]
+                );
                 mesh.position.set((index - 2.5) * 2, 0, 0);
                 mesh.castShadow = true;
                 mesh.userData = {
@@ -301,7 +282,7 @@
         });
         scene.add(lettersGroup);
 
-        // Interacción Táctil y de Clics
+        // Eventos táctiles
         const modal = document.getElementById('info-modal');
         const modalTitle = document.getElementById('info-title');
         const modalContent = document.getElementById('info-content');
@@ -328,17 +309,15 @@
             }
         });
 
-        // Animación Encaje
         let shapesElevated = false;
         document.getElementById('btn-animate').addEventListener('click', () => {
             new TWEEN.Tween(shapesGroup.position)
-                .to({ y: shapesElevated ? 0 : 2.5 }, 1000)
+                .to({ y: shapesElevated ? 0 : 2.2 }, 1000)
                 .easing(TWEEN.Easing.Cubic.Out)
                 .start();
             shapesElevated = !shapesElevated;
         });
 
-        // Movimiento de Cámara
         function moveCamera(x, y, z, tx, ty, tz) {
             new TWEEN.Tween(camera.position).to({ x, y, z }, 1200).easing(TWEEN.Easing.Quadratic.Out).start();
             new TWEEN.Tween(controls.target).to({ x: tx, y: ty, z: tz }, 1200).easing(TWEEN.Easing.Quadratic.Out).start();
@@ -348,7 +327,7 @@
         document.getElementById('btn-letters').addEventListener('click', () => moveCamera(0, 6, 14, 0, 0, 6));
         document.getElementById('btn-shapes').addEventListener('click', () => moveCamera(6, 10, 5, 6, 0, -4));
 
-        function animate(time) {
+        function animate() {
             requestAnimationFrame(animate);
             TWEEN.update();
             controls.update();
@@ -356,7 +335,6 @@
         }
         animate();
 
-        // Autoajuste dinámico de pantalla para celulares (girar pantalla o cambiar tamaño)
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
